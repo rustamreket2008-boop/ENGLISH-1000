@@ -1,14 +1,19 @@
+
 package com.english1000.app;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.view.Gravity;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.EditText;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
@@ -16,7 +21,7 @@ public class MainActivity extends Activity {
 
     private final int background = Color.rgb(7, 15, 30);
     private final int blue = Color.rgb(30, 136, 255);
-    private final int yellow = Color.rgb(255, 210, 70);
+    private LinearLayout list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +30,7 @@ public class MainActivity extends Activity {
         LinearLayout main = new LinearLayout(this);
         main.setOrientation(LinearLayout.VERTICAL);
         main.setBackgroundColor(background);
-        main.setPadding(14, 12, 14, 10);
+        main.setPadding(16, 15, 16, 10);
 
         ImageView logo = new ImageView(this);
         logo.setImageResource(R.drawable.logo);
@@ -39,16 +44,36 @@ public class MainActivity extends Activity {
         TextView title = new TextView(this);
         title.setText("ENGLISH-1000");
         title.setTextColor(Color.WHITE);
-        title.setTextSize(24);
+        title.setTextSize(25);
         title.setTypeface(null, Typeface.BOLD);
         title.setGravity(Gravity.CENTER);
-        title.setPadding(0, 5, 0, 15);
+        title.setPadding(5, 10, 5, 5);
         main.addView(title);
 
+        TextView subtitle = new TextView(this);
+        subtitle.setText("1000 English Words");
+        subtitle.setTextColor(blue);
+        subtitle.setTextSize(15);
+        subtitle.setGravity(Gravity.CENTER);
+        subtitle.setPadding(5, 0, 5, 15);
+        main.addView(subtitle);
+
         ScrollView scroll = new ScrollView(this);
-        LinearLayout list = new LinearLayout(this);
+        scroll.setFillViewport(false);
+
+        list = new LinearLayout(this);
         list.setOrientation(LinearLayout.VERTICAL);
 
+        scroll.addView(list);
+        main.addView(scroll, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+
+        setContentView(main);
+
+        loadWords();
+    }
+
+    private void loadWords() {
         try {
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(
@@ -60,35 +85,7 @@ public class MainActivity extends Activity {
                 String[] parts = line.split("\\|", 4);
 
                 if (parts.length == 4) {
-                    LinearLayout card = new LinearLayout(this);
-                    card.setOrientation(LinearLayout.VERTICAL);
-                    card.setBackgroundColor(Color.rgb(13, 29, 52));
-                    card.setPadding(14, 12, 14, 12);
-
-                    LinearLayout.LayoutParams cardParams =
-                            new LinearLayout.LayoutParams(
-                                    -1, -2);
-                    cardParams.setMargins(0, 0, 0, 9);
-                    list.addView(card, cardParams);
-
-                    TextView english = new TextView(this);
-                    english.setText(parts[0] + ".  " + parts[1]);
-                    english.setTextColor(Color.WHITE);
-                    english.setTextSize(19);
-                    english.setTypeface(null, Typeface.BOLD);
-                    card.addView(english);
-
-                    TextView pronunciation = new TextView(this);
-                    pronunciation.setText("[" + parts[2] + "]");
-                    pronunciation.setTextColor(blue);
-                    pronunciation.setTextSize(16);
-                    card.addView(pronunciation);
-
-                    TextView translation = new TextView(this);
-                    translation.setText(parts[3]);
-                    translation.setTextColor(yellow);
-                    translation.setTextSize(16);
-                    card.addView(translation);
+                    addWord(parts[0], parts[1], parts[2], parts[3]);
                 }
             }
 
@@ -96,15 +93,53 @@ public class MainActivity extends Activity {
 
         } catch (Exception e) {
             TextView error = new TextView(this);
-            error.setText("Хатогӣ дар кушодани файли words.txt");
+            error.setText("Хатогӣ ҳангоми кушодани луғат: "
+                    + e.getMessage());
             error.setTextColor(Color.RED);
+            error.setTextSize(16);
             list.addView(error);
         }
+    }
 
-        scroll.addView(list);
-        main.addView(scroll, new LinearLayout.LayoutParams(
-                -1, 0, 1));
+    private void addWord(String number, String english,
+                         String pronunciation, String translation) {
 
-        setContentView(main);
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(15, 12, 15, 12);
+
+        GradientDrawable shape = new GradientDrawable();
+        shape.setColor(Color.rgb(15, 29, 52));
+        shape.setCornerRadius(16);
+        shape.setStroke(1, Color.rgb(30, 75, 125));
+        card.setBackground(shape);
+
+        TextView word = new TextView(this);
+        word.setText(number + ". " + english);
+        word.setTextColor(Color.WHITE);
+        word.setTextSize(19);
+        word.setTypeface(null, Typeface.BOLD);
+        card.addView(word);
+
+        TextView sound = new TextView(this);
+        sound.setText("🔊 " + pronunciation);
+        sound.setTextColor(blue);
+        sound.setTextSize(15);
+        sound.setPadding(0, 5, 0, 5);
+        card.addView(sound);
+
+        TextView meaning = new TextView(this);
+        meaning.setText(translation);
+        meaning.setTextColor(Color.rgb(210, 220, 235));
+        meaning.setTextSize(15);
+        card.addView(meaning);
+
+        LinearLayout.LayoutParams params =
+                new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        params.setMargins(0, 0, 0, 10);
+        list.addView(card, params);
     }
             }
